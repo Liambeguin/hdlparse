@@ -210,7 +210,7 @@ def parse_verilog(text):
             last_item = port_obj
 
         elif action == 'end_module':
-            vobj = VerilogModule(name, ports.values(), generics, dict(sections), metacomments)
+            vobj = VerilogModule(name, list(ports.values()), generics, dict(sections), metacomments)
             objects.append(vobj)
             last_item = None
             metacomments = []

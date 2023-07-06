@@ -27,7 +27,7 @@ class MiniLexer(object):
         self.tokens = {}
 
         # Pre-process the state definitions
-        for state, patterns in tokens.items():
+        for state, patterns in list(tokens.items()):
             full_patterns = []
             for p in patterns:
                 pat = re.compile(p[0], flags)
