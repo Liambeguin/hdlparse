@@ -1,14 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright © 2017 Kevin Thibedeau
 # Distributed under the terms of the MIT license
 import ast
-import io
 import os
 import re
+
 from pprint import pprint
+
 from hdlparse.minilexer import MiniLexer
 
-"""VHDL documentation parser"""
+'''VHDL documentation parser'''
 
 vhdl_tokens = {
     'root': [
@@ -159,21 +159,21 @@ VhdlLexer = MiniLexer(vhdl_tokens, flags=re.MULTILINE | re.IGNORECASE)
 
 
 class VhdlObject:
-    """Base class for parsed VHDL objects
+    '''Base class for parsed VHDL objects.
 
     Args:
       name (str): Name of the object
       desc (str): Description from object metacomments
-    """
+    '''
 
-    def __init__(self, name, desc=None):
+    def __init__(self, name, desc=None) -> None:
         self.name = name
         self.kind = 'unknown'
         self.desc = desc
 
 
 class VhdlParameter:
-    """Parameter to subprograms, ports, and generics
+    '''Parameter to subprograms, ports, and generics.
 
     Args:
       name (str): Name of the object
@@ -182,9 +182,9 @@ class VhdlParameter:
       default_value (str): Default value of the parameter
       desc (str): Description from object metacomments
       param_desc (str): Description of the parameter
-    """
+    '''
 
-    def __init__(self, name, mode=None, data_type=None, default_value=None, desc=None, param_desc=None):
+    def __init__(self, name, mode=None, data_type=None, default_value=None, desc=None, param_desc=None) -> None:
         self.name = name
         self.mode = mode
         self.data_type = data_type
@@ -192,26 +192,26 @@ class VhdlParameter:
         self.desc = desc
         self.param_desc = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.mode is not None:
-            param = f"{self.name} : {self.mode} {self.data_type.name + self.data_type.arange}"
+            param = f'{self.name} : {self.mode} {self.data_type.name + self.data_type.arange}'
         else:
-            param = f"{self.name} : {self.data_type.name + self.data_type.arange}"
+            param = f'{self.name} : {self.data_type.name + self.data_type.arange}'
 
         if self.default_value is not None:
-            param = f"{param} := {self.default_value}"
+            param = f'{param} := {self.default_value}'
 
         if self.param_desc is not None:
-            param = f"{param} --{self.param_desc}"
+            param = f'{param} --{self.param_desc}'
 
         return param
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"VhdlParameter('{self.name}', '{self.mode}', '{self.data_type.name + self.data_type.arange}')"
 
 
 class VhdlParameterType:
-    """Parameter type definition
+    '''Parameter type definition.
 
     Args:
       name (str): Name of the type
@@ -219,94 +219,94 @@ class VhdlParameterType:
       r_bound (str): A simple expression based on digits or variable names
       l_bound (str): A simple expression based on digits or variable names
       arange (str): Original array range string
-    """
+    '''
 
-    def __init__(self, name, direction="", r_bound="", l_bound="", arange=""):
+    def __init__(self, name, direction='', r_bound='', l_bound='', arange='') -> None:
         self.name = name
         self.direction = direction.strip()
         self.r_bound = r_bound.strip()
         self.l_bound = l_bound.strip()
         self.arange = arange
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"VhdlParameterType('{self.name}','{self.arange}')"
 
 
 class VhdlPackage(VhdlObject):
-    """Package declaration
+    '''Package declaration.
 
     Args:
       name (str): Name of the package
       desc (str): Description from object metacomments
-    """
+    '''
 
-    def __init__(self, name, desc=None):
+    def __init__(self, name, desc=None) -> None:
         VhdlObject.__init__(self, name, desc)
         self.kind = 'package'
 
 
 class VhdlType(VhdlObject):
-    """Type definition
+    '''Type definition.
 
     Args:
       name (str): Name of the type
       package (str): Package containing the type
       type_of (str): Object type of this type definition
       desc (str, optional): Description from object metacomments
-    """
+    '''
 
-    def __init__(self, name, package, type_of, desc=None):
+    def __init__(self, name, package, type_of, desc=None) -> None:
         VhdlObject.__init__(self, name, desc)
         self.kind = 'type'
         self.package = package
         self.type_of = type_of
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"VhdlType('{self.name}', '{self.type_of}')"
 
 
 class VhdlSubtype(VhdlObject):
-    """Subtype definition
+    '''Subtype definition.
 
     Args:
       name (str): Name of the subtype
       package (str): Package containing the subtype
       base_type (str): Base type name derived from
       desc (str, optional): Description from object metacomments
-    """
+    '''
 
-    def __init__(self, name, package, base_type, desc=None):
+    def __init__(self, name, package, base_type, desc=None) -> None:
         VhdlObject.__init__(self, name, desc)
         self.kind = 'subtype'
         self.package = package
         self.base_type = base_type
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"VhdlSubtype('{self.name}', '{self.base_type}')"
 
 
 class VhdlConstant(VhdlObject):
-    """Constant definition
+    '''Constant definition.
 
     Args:
       name (str): Name of the constant
       package (str): Package containing the constant
       base_type (str): Type fo the constant
       desc (str, optional): Description from object metacomments
-    """
+    '''
 
-    def __init__(self, name, package, base_type, desc=None):
+    def __init__(self, name, package, base_type, desc=None) -> None:
         VhdlObject.__init__(self, name, desc)
         self.kind = 'constant'
         self.package = package
         self.base_type = base_type
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"VhdlConstant('{self.name}', '{self.base_type}')"
 
 
 class VhdlFunction(VhdlObject):
-    """Function declaration
+    '''Function declaration.
 
     Args:
       name (str): Name of the function
@@ -314,67 +314,67 @@ class VhdlFunction(VhdlObject):
       parameters (list of VhdlParameter): Parameters to the function
       return_type (str, optional): Type of the return value
       desc (str, optional): Description from object metacomments
-    """
+    '''
 
-    def __init__(self, name, package, parameters, return_type=None, desc=None):
+    def __init__(self, name, package, parameters, return_type=None, desc=None) -> None:
         VhdlObject.__init__(self, name, desc)
         self.kind = 'function'
         self.package = package
         self.parameters = parameters
         self.return_type = return_type
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"VhdlFunction('{self.name}')"
 
 
 class VhdlProcedure(VhdlObject):
-    """Procedure declaration
+    '''Procedure declaration.
 
     Args:
       name (str): Name of the procedure
       package (str): Package containing the procedure
       parameters (list of VhdlParameter): Parameters to the procedure
       desc (str, optional): Description from object metacomments
-    """
+    '''
 
-    def __init__(self, name, package, parameters, desc=None):
+    def __init__(self, name, package, parameters, desc=None) -> None:
         VhdlObject.__init__(self, name, desc)
         self.kind = 'procedure'
         self.package = package
         self.parameters = parameters
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"VhdlProcedure('{self.name}')"
 
 
 class VhdlEntity(VhdlObject):
-    """Entity declaration
+    '''Entity declaration
     Args:
       name (str): Name of the entity
       ports (list of VhdlParameter): Port parameters to the entity
       generics (list of VhdlParameter): Generic parameters to the entity
       sections (list of str): Metacomment sections
-      desc (str, optional): Description from object metacomments
-    """
+      desc (str, optional): Description from object metacomments.
+    '''
 
-    def __init__(self, name, ports, generics=None, sections=None, desc=None):
+    def __init__(self, name, ports, generics=None, sections=None, desc=None) -> None:
         VhdlObject.__init__(self, name, desc)
         self.kind = 'entity'
         self.generics = generics if generics is not None else []
         self.ports = ports
         self.sections = sections if sections is not None else {}
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"VhdlEntity('{self.name}')"
 
     def dump(self):
-        print(f"VHDL entity: {self.name}")
+        print(f'VHDL entity: {self.name}')
         for p in self.ports:
-            print(f"\t{p.name} ({type(p.name)}), {p.data_type} ({type(p.data_type)})")
+            print(f'\t{p.name} ({type(p.name)}), {p.data_type} ({type(p.data_type)})')
 
 
 class VhdlComponent(VhdlObject):
-    """Component declaration
+    '''Component declaration.
 
     Args:
       name (str): Name of the component
@@ -383,9 +383,9 @@ class VhdlComponent(VhdlObject):
       generics (list of VhdlParameter): Generic parameters to the component
       sections (list of str): Metacomment sections
       desc (str, optional): Description from object metacomments
-    """
+    '''
 
-    def __init__(self, name, package, ports, generics=None, sections=None, desc=None):
+    def __init__(self, name, package, ports, generics=None, sections=None, desc=None) -> None:
         VhdlObject.__init__(self, name, desc)
         self.kind = 'component'
         self.package = package
@@ -393,36 +393,36 @@ class VhdlComponent(VhdlObject):
         self.ports = ports
         self.sections = sections if sections is not None else {}
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"VhdlComponent('{self.name}')"
 
     def dump(self):
-        print(f"VHDL component: {self.name}")
+        print(f'VHDL component: {self.name}')
         for p in self.ports:
-            print(f"\t{p.name} ({type(p.name)}), {p.data_type} ({type(p.data_type)})")
+            print(f'\t{p.name} ({type(p.name)}), {p.data_type} ({type(p.data_type)})')
 
 
 def parse_vhdl_file(fname):
-    """Parse a named VHDL file
+    '''Parse a named VHDL file.
 
     Args:
       fname(str): Name of file to parse
     Returns:
       Parsed objects.
-    """
-    with open(fname, 'rt') as fh:
+    '''
+    with open(fname) as fh:
         text = fh.read()
     return parse_vhdl(text)
 
 
 def parse_vhdl(text):
-    """Parse a text buffer of VHDL code
+    '''Parse a text buffer of VHDL code.
 
     Args:
       text(str): Source code to parse
     Returns:
       Parsed objects.
-    """
+    '''
     lex = VhdlLexer
 
     name = None
@@ -632,89 +632,87 @@ def parse_vhdl(text):
 
 
 def subprogram_prototype(vo):
-    """Generate a canonical prototype string
+    '''Generate a canonical prototype string.
 
     Args:
       vo (VhdlFunction, VhdlProcedure): Subprogram object
     Returns:
       Prototype string.
-    """
-
+    '''
     plist = '; '.join(str(p) for p in vo.parameters)
 
     if isinstance(vo, VhdlFunction):
         if len(vo.parameters) > 0:
-            proto = f"function {vo.name}({plist}) return {vo.return_type};"
+            proto = f'function {vo.name}({plist}) return {vo.return_type};'
         else:
-            proto = f"function {vo.name} return {vo.return_type};"
+            proto = f'function {vo.name} return {vo.return_type};'
 
     else:  # procedure
-        proto = f"procedure {vo.name}({plist});"
+        proto = f'procedure {vo.name}({plist});'
 
     return proto
 
 
 def subprogram_signature(vo, fullname=None):
-    """Generate a signature string
+    '''Generate a signature string.
 
     Args:
       vo (VhdlFunction, VhdlProcedure): Subprogram object
     Returns:
       Signature string.
-    """
-
+    '''
     if fullname is None:
         fullname = vo.name
 
     if isinstance(vo, VhdlFunction):
         plist = ','.join(p.data_type for p in vo.parameters)
-        sig = f"{fullname}[{plist} return {vo.return_type}]"
+        sig = f'{fullname}[{plist} return {vo.return_type}]'
     else:  # procedure
         plist = ','.join(p.data_type for p in vo.parameters)
-        sig = f"{fullname}[{plist}]"
+        sig = f'{fullname}[{plist}]'
 
     return sig
 
 
 def is_vhdl(fname):
-    """Identify file as VHDL by its extension
+    '''Identify file as VHDL by its extension.
 
     Args:
       fname (str): File name to check
     Returns:
       True when file has a VHDL extension.
-    """
+    '''
     return os.path.splitext(fname)[1].lower() in ('.vhdl', '.vhd')
 
 
 class VhdlExtractor:
-    """Utility class that caches parsed objects and tracks array type definitions
+    '''Utility class that caches parsed objects and tracks array type definitions.
 
     Args:
       array_types(set): Initial array types
-    """
+    '''
 
-    def __init__(self, array_types=set()):
-        self.array_types = set(('std_ulogic_vector', 'std_logic_vector',
-                                'signed', 'unsigned', 'bit_vector'))
+    def __init__(self, array_types=set()) -> None:
+        self.array_types = {'std_ulogic_vector', 'std_logic_vector',
+                                'signed', 'unsigned', 'bit_vector'}
 
         self.array_types |= array_types
         self.object_cache = {}
 
     def extract_objects(self, fname, type_filter=None):
-        """Extract objects from a source file
+        '''Extract objects from a source file.
 
         Args:
           fname (str): File to parse
           type_filter (class, optional): Object class to filter results
         Returns:
           List of parsed objects.
-        """
+        '''
         objects = []
         if fname in self.object_cache:
             objects = self.object_cache[fname]
         else:
-            with io.open(fname, 'rt', encoding='latin-1') as fh:
+            with open(fname, encoding='latin-1') as fh:
                 text = fh.read()
                 objects = parse_vhdl(text)
                 self.object_cache[fname] = objects
@@ -726,14 +724,14 @@ class VhdlExtractor:
         return objects
 
     def extract_objects_from_source(self, text, type_filter=None):
-        """Extract object declarations from a text buffer
+        '''Extract object declarations from a text buffer.
 
         Args:
           text (str): Source code to parse
           type_filter (class, optional): Object class to filter results
         Returns:
           List of parsed objects.
-        """
+        '''
         objects = parse_vhdl(text)
         self._register_array_types(objects)
 
@@ -743,36 +741,35 @@ class VhdlExtractor:
         return objects
 
     def is_array(self, data_type):
-        """Check if a type is a known array type
+        '''Check if a type is a known array type.
 
         Args:
           data_type (str): Name of type to check
         Returns:
           True if ``data_type`` is a known array type.
-        """
-
+        '''
         # Split off any brackets
         data_type = data_type.split('[')[0].strip()
 
         return data_type.lower() in self.array_types
 
     def _add_array_types(self, type_defs):
-        """Add array data types to internal registry
+        '''Add array data types to internal registry.
 
         Args:
           type_defs (dict): Dictionary of type definitions
-        """
+        '''
         if 'arrays' in type_defs:
             self.array_types |= set(type_defs['arrays'])
 
     def load_array_types(self, fname):
-        """Load file of previously extracted data types
+        '''Load file of previously extracted data types.
 
         Args:
           fname (str): Name of file to load array database from
-        """
+        '''
         type_defs = ''
-        with open(fname, 'rt') as fh:
+        with open(fname) as fh:
             type_defs = fh.read()
 
         try:
@@ -783,21 +780,21 @@ class VhdlExtractor:
         self._add_array_types(type_defs)
 
     def save_array_types(self, fname):
-        """Save array type registry to a file
+        '''Save array type registry to a file.
 
         Args:
           fname (str): Name of file to save array database to
-        """
-        type_defs = {'arrays': sorted(list(self.array_types))}
-        with open(fname, 'wt') as fh:
+        '''
+        type_defs = {'arrays': sorted(self.array_types)}
+        with open(fname, 'w') as fh:
             pprint(type_defs, stream=fh)
 
     def _register_array_types(self, objects):
-        """Add array type definitions to internal registry
+        '''Add array type definitions to internal registry.
 
         Args:
           objects (list of VhdlType or VhdlSubtype): Array types to track
-        """
+        '''
         # Add all array types directly
         types = [o for o in objects if isinstance(o, VhdlType) and o.type_of == 'array_type']
         for t in types:
@@ -813,11 +810,11 @@ class VhdlExtractor:
                 self.array_types.add(k)
 
     def register_array_types_from_sources(self, source_files):
-        """Add array type definitions from a file list to internal registry
+        '''Add array type definitions from a file list to internal registry.
 
         Args:
           source_files (list of str): Files to parse for array definitions
-        """
+        '''
         for fname in source_files:
             if is_vhdl(fname):
                 self._register_array_types(self.extract_objects(fname))
@@ -834,10 +831,10 @@ package foo is
   component acomp is
     port (
       a,b,c : in std_ulogic;    -- no default value
-      f,g,h : inout bit := '1'; -- bit ports 
+      f,g,h : inout bit := '1'; -- bit ports
       v : in std_logic_vector(lBound -1 downto 0) -- array range
     ); -- port list comment
-    
+
   end component;
 
 end package;
